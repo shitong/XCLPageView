@@ -21,6 +21,7 @@ xcuserdata
 *.xccheckout
 *.moved-aside
 *.xcuserstate
+*.xcworkspace
 *.xcscmblueprint
 
 ## Obj-C/Swift specific
