@@ -140,6 +140,10 @@
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
+    if (!self.headerView) {
+        return;
+    }
+    
     // 这里有可能已经添加到self上面了又调用，此时不再处理
     if ([self.headerView.superview isEqual:self]) {
         return;
@@ -280,6 +284,10 @@
 
 - (void)addHeaderViewToChildTableHeaderView
 {
+    if (!self.headerView) {
+        return;
+    }
+    
     UIViewController <XCLPageViewProtocol> *controller = self.childViewControllers[self.currentIndex];
     [self.headerView.superview removeConstraints:self.headerViewConstraints];
     [controller.tableView.tableHeaderView addSubview:self.headerView];
@@ -302,6 +310,10 @@
 
 - (void)addHeaderViewConstraintsWithOffsetTop:(CGFloat)offsetTop
 {
+    if (!self.headerView) {
+        return;
+    }
+    
     if (!self.headerViewConstraints) {
         self.headerViewConstraints = [NSMutableArray array];
     }
@@ -350,6 +362,10 @@
 
 - (void)reloadChildTableViewContentOffset
 {
+    if (!self.headerView) {
+        return;
+    }
+    
     CGPoint offset = [self.childViewControllers[self.currentIndex] tableView].contentOffset;
     for (NSInteger i = 0; i < self.childViewControllers.count; ++i) {
         UIViewController <XCLPageViewProtocol> *controller = self.childViewControllers[i];
@@ -368,6 +384,10 @@
 
 - (void)reloadHeaderViewTopConttraint
 {
+    if (!self.headerView) {
+        return;
+    }
+    
     // 如果headerView在self上，则不需要更新约束
     if ([self.headerView.superview isEqual:self]) {
         return;
@@ -390,7 +410,6 @@
 }
 
 #pragma mark - getters and setters
-
 
 - (UIScrollView *)scrollView
 {
