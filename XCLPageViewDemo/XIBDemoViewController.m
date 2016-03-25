@@ -25,8 +25,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    DemoTableViewController *controller1 = [[DemoTableViewController alloc] initWithItemCount:4];
-    DemoTableViewController *controller2 = [[DemoTableViewController alloc] initWithItemCount:20];
+    DemoTableViewController *controller1 = [[DemoTableViewController alloc] initWithItemCount:30];
+    DemoTableViewController *controller2 = [[DemoTableViewController alloc] initWithItemCount:100];
     
     self.headerView = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([XIBHeaderView class]) owner:self options:nil] firstObject];
     [self.headerView.segmentedControl addTarget:self action:@selector(segmentedControlValueChanged:) forControlEvents:UIControlEventValueChanged];

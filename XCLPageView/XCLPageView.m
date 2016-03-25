@@ -32,19 +32,19 @@
 
 @interface XCLPageView () <UIScrollViewDelegate>
 
+@property (nonatomic, weak  ) UIViewController   *parentViewController;
+@property (nonatomic, strong) NSArray            *childViewControllers;
+
 @property (nonatomic, strong) UIScrollView       *scrollView;
+@property (nonatomic        ) NSUInteger         currentIndex;
+
 @property (nonatomic, strong) UIView             *headerView;
 @property (nonatomic, strong) NSMutableArray     *headerViewConstraints;
 @property (nonatomic, strong) NSLayoutConstraint *headerViewHeightConttraint;
 @property (nonatomic, strong) NSLayoutConstraint *headerViewTopConttraint;
 @property (nonatomic        ) BOOL               headerViewLastUserInteractionEnabled;
-
-@property (nonatomic, weak  ) UIViewController   *parentViewController;
-@property (nonatomic, strong) NSArray            *childViewControllers;
-
 @property (nonatomic        ) CGFloat            headerViewDefaultHeight;
 @property (nonatomic        ) CGFloat            headerViewMinHeight;
-@property (nonatomic        ) NSUInteger         currentIndex;
 
 @end
 
@@ -74,6 +74,10 @@
 
 - (void)dealloc
 {
+    if (!self.headerView) {
+        return;
+    }
+    
     for (UIViewController <XCLPageViewProtocol> *controller in self.childViewControllers) {
         [controller.tableView removeObserver:self forKeyPath:@"contentOffset"];
     }
@@ -81,40 +85,58 @@
 
 - (void)layoutSubviews
 {
-    NSLog(@"%s", __FUNCTION__);
     [super layoutSubviews];
+    
     CGFloat width = self.bounds.size.width;
-    CGFloat x = self.currentIndex * width;
-    if (x != self.scrollView.contentOffset.x && !self.scrollView.isDragging && !self.scrollView.isDecelerating) {
-        [self.scrollView setContentOffset:CGPointMake(x, 0) animated:NO];
+    CGFloat offsetX = self.currentIndex * width;
+    if (offsetX != self.scrollView.contentOffset.x && !self.scrollView.isDragging && !self.scrollView.isDecelerating) {
+        [self.scrollView setContentOffset:CGPointMake(offsetX, 0) animated:NO];
     }
     
     // 旋转屏幕时会触发tableView的contentOffset的变化，这里需要重新计算一下约束，否则headerView位置可能不对
-    [self reloadHeaderViewTopConttraint];
+    [self calculateHeaderViewTopConttraintIfNeeded];
 }
 
 #pragma mark - publish methods
+
+- (void)setParentViewController:(UIViewController *)parentViewController
+           childViewControllers:(NSArray <UIViewController *> *)childViewControllers
+{
+    self.parentViewController = parentViewController;
+    self.childViewControllers = childViewControllers;
+    self.parentViewController.automaticallyAdjustsScrollViewInsets = NO;
+    [self addChildToParent];
+}
 
 - (void)setHeaderView:(UIView *)headerView
         defaultHeight:(CGFloat)defaultHeight
             minHeight:(CGFloat)minHeight
 {
+    if (!self.parentViewController) {
+        @throw [NSException exceptionWithName:@"XCLPageView setHeaderView:defaultHeight:minHeight: error"
+                                       reason:@"setHeaderView:defaultHeight:minHeight: called must after setParentViewController:childViewControllers:"
+                                     userInfo:nil];
+    }
+    
     self.headerView                                           = headerView;
     self.headerViewDefaultHeight                              = defaultHeight;
     self.headerViewMinHeight                                  = minHeight;
     self.headerViewLastUserInteractionEnabled                 = headerView.userInteractionEnabled;
     self.headerView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self setHeaderViewIfNeeded];
-}
-
-
-
-- (void)setParentViewController:(UIViewController *)parentViewController childViewControllers:(NSArray <UIViewController <XCLPageViewProtocol> *> *)childViewControllers
-{
-    self.parentViewController = parentViewController;
-    self.childViewControllers = childViewControllers;
-    [self addChildToParent];
-    [self setHeaderViewIfNeeded];
+    
+    for (UIViewController <XCLPageViewProtocol> *controller in self.childViewControllers) {
+        
+        if ([controller respondsToSelector:@selector(tableView)]) {
+            [controller.tableView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
+            controller.tableView.tableHeaderView = [[XCLTableHeaderView alloc] initWithFrame:CGRectMake(0,0, controller.tableView.bounds.size.width, self.headerViewDefaultHeight)];
+        } else {
+            @throw [NSException exceptionWithName:@"XCLPageView setHeaderView:defaultHeight:minHeight: error"
+                                           reason:@"controller must contain tableView when use headerView"
+                                         userInfo:nil];
+        }
+    }
+    
+    [self addHeaderViewToChildTableHeaderView];
 }
 
 - (void)setIndex:(NSUInteger)index
@@ -127,11 +149,10 @@
         return;
     }
     
-    [self reloadChildTableViewContentOffset];
-    
+    [self calculateChildTableViewContentOffset];
     CGFloat width = self.bounds.size.width;
-    CGFloat x = index * width;
-    [self.scrollView setContentOffset:CGPointMake(x, 0) animated:NO];
+    CGFloat offsetX = index * width;
+    [self.scrollView setContentOffset:CGPointMake(offsetX, 0) animated:NO];
     self.currentIndex = index;
     [self addHeaderViewToChildTableHeaderView];
 }
@@ -149,14 +170,7 @@
         return;
     }
     
-    CGRect frame = [self.headerView.superview convertRect:self.headerView.frame toView:self];
-    [self reloadChildTableViewContentOffset];
-    [self.headerView.superview removeConstraints:self.headerViewConstraints];
-    // 添加到self上之后禁止响应
-    self.headerViewLastUserInteractionEnabled = self.headerView.userInteractionEnabled;
-    self.headerView.userInteractionEnabled = NO;
-    [self addSubview:self.headerView];
-    [self addHeaderViewConstraintsWithOffsetTop:frame.origin.y];
+    [self addHeaderViewToPageView];
 }
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
@@ -179,19 +193,16 @@
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-    NSLog(@"%s", __FUNCTION__);
     if (![keyPath isEqualToString:@"contentOffset"]) {
         return;
     }
-    [self reloadHeaderViewTopConttraint];
+    [self calculateHeaderViewTopConttraintIfNeeded];
 }
 
 #pragma mark - private methods
 
 - (void)addChildToParent
 {
-    self.parentViewController.automaticallyAdjustsScrollViewInsets = NO;
-    
     UIView *lastView = nil;
     for (NSInteger i = 0; i < self.childViewControllers.count; ++i) {
         UIViewController <XCLPageViewProtocol> *controller = self.childViewControllers[i];
@@ -201,7 +212,6 @@
         
         controller.automaticallyAdjustsScrollViewInsets = NO;
         controller.view.translatesAutoresizingMaskIntoConstraints = NO;
-        [controller.tableView addObserver:self forKeyPath:@"contentOffset" options:NSKeyValueObservingOptionOld | NSKeyValueObservingOptionNew context:nil];
         
         [controller.view.superview addConstraint:
          [NSLayoutConstraint constraintWithItem:controller.view
@@ -262,24 +272,16 @@
                                    constant:0]];
 }
 
-- (void)setHeaderViewIfNeeded
+- (void)addHeaderViewToPageView
 {
-    if (!self.headerView) {
-        return;
-    }
-    
-    if (self.childViewControllers.count == 0) {
-        return;
-    }
-    
-    for (NSInteger i = 0; i < self.childViewControllers.count; ++i) {
-        UIViewController <XCLPageViewProtocol> *controller = self.childViewControllers[i];
-        if (!controller.tableView.tableHeaderView) {
-            controller.tableView.tableHeaderView = [[XCLTableHeaderView alloc] initWithFrame:CGRectMake(0, 0, controller.tableView.bounds.size.width, self.headerViewDefaultHeight)];
-        }
-    }
-    
-    [self addHeaderViewToChildTableHeaderView];
+    CGRect frame = [self.headerView.superview convertRect:self.headerView.frame toView:self];
+    [self calculateChildTableViewContentOffset];
+    [self.headerView.superview removeConstraints:self.headerViewConstraints];
+    // 添加到self上之后禁止响应
+    self.headerViewLastUserInteractionEnabled = self.headerView.userInteractionEnabled;
+    self.headerView.userInteractionEnabled = NO;
+    [self addSubview:self.headerView];
+    [self updateHeaderViewConstraintsWithOffsetTop:frame.origin.y];
 }
 
 - (void)addHeaderViewToChildTableHeaderView
@@ -305,10 +307,10 @@
         offsetTop = controller.tableView.contentOffset.y;
     }
     
-    [self addHeaderViewConstraintsWithOffsetTop:offsetTop];
+    [self updateHeaderViewConstraintsWithOffsetTop:offsetTop];
 }
 
-- (void)addHeaderViewConstraintsWithOffsetTop:(CGFloat)offsetTop
+- (void)updateHeaderViewConstraintsWithOffsetTop:(CGFloat)offsetTop
 {
     if (!self.headerView) {
         return;
@@ -360,7 +362,7 @@
     [self.headerView layoutIfNeeded];
 }
 
-- (void)reloadChildTableViewContentOffset
+- (void)calculateChildTableViewContentOffset
 {
     if (!self.headerView) {
         return;
@@ -382,7 +384,7 @@
     }
 }
 
-- (void)reloadHeaderViewTopConttraint
+- (void)calculateHeaderViewTopConttraintIfNeeded
 {
     if (!self.headerView) {
         return;
@@ -420,6 +422,9 @@
         _scrollView.pagingEnabled = YES;
         _scrollView.showsHorizontalScrollIndicator = NO;
         _scrollView.showsVerticalScrollIndicator = NO;
+        _scrollView.alwaysBounceVertical = NO;
+        _scrollView.alwaysBounceHorizontal = YES;
+        _scrollView.scrollsToTop = NO;
         [self addSubview:_scrollView];
         
         [_scrollView.superview addConstraint:

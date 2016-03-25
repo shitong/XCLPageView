@@ -25,10 +25,9 @@
     
     self.view.backgroundColor = [UIColor whiteColor];
     self.navigationItem.titleView = self.segmentedControl;
-    DemoTableViewController *controller1 = [[DemoTableViewController alloc] initWithItemCount:5];
+    UIViewController *controller1 = [[UIViewController alloc] init];
     DemoTableViewController *controller2 = [[DemoTableViewController alloc] initWithItemCount:20];
     [self.pageView setParentViewController:self childViewControllers:@[controller1, controller2]];
-//    [self.pageView setHeaderView:self.headerView defaultHeight:300 minHeight:0];
 }
 
 - (void)segmentedControlValueChanged:(id)sender
