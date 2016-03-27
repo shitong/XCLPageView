@@ -8,8 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
+@class XCLSegmentView;
 @interface XIBHeaderView : UIView
-
-@property (weak, nonatomic) IBOutlet UISegmentedControl *segmentedControl;
-
+@property (weak, nonatomic) IBOutlet XCLSegmentView *segmentView;
 @end

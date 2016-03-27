@@ -7,13 +7,13 @@
 //
 
 #import "XIBDemoViewController.h"
-#import "XCLPageView.h"
-
 #import "DemoTableViewController.h"
 #import "XIBHeaderView.h"
 
-@interface XIBDemoViewController () <XCLPageViewDelegate>
+#import "XCLPageView.h"
+#import "XCLSegmentView.h"
 
+@interface XIBDemoViewController () <XCLPageViewDelegate, XCLSegmentViewDelegate>
 
 @property (weak  , nonatomic) IBOutlet XCLPageView *pageView;
 @property (strong, nonatomic) XIBHeaderView *headerView;
@@ -29,42 +29,41 @@
     DemoTableViewController *controller2 = [[DemoTableViewController alloc] initWithItemCount:100];
     
     self.headerView = [[[NSBundle mainBundle] loadNibNamed:NSStringFromClass([XIBHeaderView class]) owner:self options:nil] firstObject];
-    [self.headerView.segmentedControl addTarget:self action:@selector(segmentedControlValueChanged:) forControlEvents:UIControlEventValueChanged];
+    
+    
+    [self.headerView.segmentView setTitles:@[@"First", @"Second"]];
+    self.headerView.segmentView.delegate = self;
+    self.headerView.segmentView.font = [UIFont systemFontOfSize:14];
+    self.headerView.segmentView.normalColor = [UIColor colorWithRed:146.0/255.0 green:146.0/255.0 blue:146.0/255.0 alpha:1.0];
+    self.headerView.segmentView.selectedColor = [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
+    self.headerView.segmentView.indicator.backgroundColor = self.headerView.segmentView.selectedColor;
+    self.headerView.segmentView.indicatorEdgeInsets = UIEdgeInsetsMake(self.headerView.segmentView.bounds.size.height - 2, 10, 0, 10);
+    self.headerView.segmentView.selectedSegmentIndex = 1;
     
     self.pageView.delegate = self;
     [self.pageView setParentViewController:self childViewControllers:@[controller1, controller2]];
-    [self.pageView setHeaderView:self.headerView defaultHeight:200 minHeight:50];
+    [self.pageView setHeaderView:self.headerView defaultHeight:200 minHeight:self.headerView.segmentView.bounds.size.height];
     [self.pageView setIndex:1];
-    self.headerView.segmentedControl.selectedSegmentIndex = 1;
-    
-//    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemAdd target:self action:@selector(onAdd)];
 }
 
+#pragma mark - XCLSegmentViewDelegate
 
-
-//- (void)onAdd
-//{
-//    UIViewController *controller = [[UIViewController alloc] init];
-////    [self presentViewController:controller animated:YES completion:nil];
-//    [self.navigationController pushViewController:controller animated:YES];
-//}
-
-- (void)segmentedControlValueChanged:(id)sender
+- (void)segmentView:(XCLSegmentView *)segmentView clickedAtIndex:(NSUInteger)index
 {
-    [self.pageView setIndex:self.headerView.segmentedControl.selectedSegmentIndex];
+    [self.pageView setIndex:index];
 }
 
 #pragma mark - XCLPageViewDelegate
 
 - (void)pageViewDidScroll:(XCLPageView *)pageView
 {
-    NSLog(@"%s x: %@", __FUNCTION__, @(pageView.scrollView.contentOffset.x));
+    CGFloat pageWidth = pageView.scrollView.contentSize.width/self.headerView.segmentView.titles.count;
+    self.headerView.segmentView.indicatorPosition = pageView.scrollView.contentOffset.x / (pageWidth * (self.headerView.segmentView.titles.count - 1));
 }
 
 - (void)pageView:(XCLPageView *)pageView scrollDidEndAtIndex:(NSUInteger)index
 {
-    NSLog(@"%s index: %@", __FUNCTION__, @(index));
-    self.headerView.segmentedControl.selectedSegmentIndex = index;
+    self.headerView.segmentView.selectedSegmentIndex = index;
 }
 
 @end

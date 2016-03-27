@@ -12,7 +12,6 @@
 
 @interface CodeDemoViewController () <XCLPageViewDelegate>
 
-@property (nonatomic, strong) UIView             *headerView;
 @property (nonatomic, strong) XCLPageView        *pageView;
 @property (nonatomic, strong) UISegmentedControl *segmentedControl;
 
@@ -25,7 +24,15 @@
     
     self.view.backgroundColor = [UIColor whiteColor];
     self.navigationItem.titleView = self.segmentedControl;
+    
     UIViewController *controller1 = [[UIViewController alloc] init];
+    UILabel *label = [[UILabel alloc] init];
+    label.text = @"UIViewController";
+    label.frame = controller1.view.bounds;
+    label.textAlignment = NSTextAlignmentCenter;
+    label.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    [controller1.view addSubview:label];
+    
     DemoTableViewController *controller2 = [[DemoTableViewController alloc] initWithItemCount:20];
     [self.pageView setParentViewController:self childViewControllers:@[controller1, controller2]];
 }
@@ -102,16 +109,6 @@
     }
     
     return _pageView;
-}
-
-- (UIView *)headerView
-{
-    if (!_headerView) {
-        _headerView = [[UIView alloc] init];
-        _headerView.backgroundColor = [UIColor redColor];
-    }
-    
-    return _headerView;
 }
 
 @end

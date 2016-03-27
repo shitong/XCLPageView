@@ -1,28 +1,21 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="9532" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="10116" systemVersion="15E65" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES">
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
     </dependencies>
     <objects>
         <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="XIBDemoViewController"/>
         <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
         <view contentMode="scaleToFill" id="puB-eN-izg" customClass="XIBHeaderView">
-            <rect key="frame" x="0.0" y="0.0" width="208" height="159"/>
+            <rect key="frame" x="0.0" y="0.0" width="208" height="195"/>
             <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
             <subviews>
                 <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="snowflakes" translatesAutoresizingMaskIntoConstraints="NO" id="vvf-gJ-Jtn">
-                    <rect key="frame" x="0.0" y="0.0" width="208" height="159"/>
+                    <rect key="frame" x="0.0" y="0.0" width="208" height="166"/>
                 </imageView>
-                <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="uy6-9v-fT7">
-                    <rect key="frame" x="44" y="121" width="121" height="29"/>
-                    <segments>
-                        <segment title="First"/>
-                        <segment title="Second"/>
-                    </segments>
-                </segmentedControl>
                 <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="2FJ-xF-Csi">
-                    <rect key="frame" x="72" y="48" width="64" height="64"/>
+                    <rect key="frame" x="72" y="51" width="64" height="64"/>
                     <subviews>
                         <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="avatar" translatesAutoresizingMaskIntoConstraints="NO" id="oAJ-av-f7T">
                             <rect key="frame" x="2" y="2" width="60" height="60"/>
@@ -38,23 +31,49 @@
                         <constraint firstAttribute="trailing" secondItem="oAJ-av-f7T" secondAttribute="trailing" constant="2" id="zwx-kK-Qg3"/>
                     </constraints>
                 </view>
+                <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="401-RQ-vto" customClass="XCLSegmentView">
+                    <rect key="frame" x="0.0" y="166" width="208" height="29"/>
+                    <subviews>
+                        <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4AR-Fn-P4P">
+                            <rect key="frame" x="0.0" y="28" width="208" height="1"/>
+                            <color key="backgroundColor" red="0.81568627450980391" green="0.81568627450980391" blue="0.81568627450980391" alpha="1" colorSpace="calibratedRGB"/>
+                            <constraints>
+                                <constraint firstAttribute="height" constant="1" id="9Mt-GE-nRt">
+                                    <userDefinedRuntimeAttributes>
+                                        <userDefinedRuntimeAttribute type="number" keyPath="constant">
+                                            <real key="value" value="0.5"/>
+                                        </userDefinedRuntimeAttribute>
+                                    </userDefinedRuntimeAttributes>
+                                </constraint>
+                            </constraints>
+                        </view>
+                    </subviews>
+                    <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                    <constraints>
+                        <constraint firstAttribute="height" constant="29" id="5h8-Wx-UVg"/>
+                        <constraint firstItem="4AR-Fn-P4P" firstAttribute="leading" secondItem="401-RQ-vto" secondAttribute="leading" id="ZKf-UB-YUA"/>
+                        <constraint firstAttribute="trailing" secondItem="4AR-Fn-P4P" secondAttribute="trailing" id="fVk-ID-Ora"/>
+                        <constraint firstAttribute="bottom" secondItem="4AR-Fn-P4P" secondAttribute="bottom" id="mfK-Af-a56"/>
+                    </constraints>
+                </view>
             </subviews>
             <constraints>
                 <constraint firstItem="vvf-gJ-Jtn" firstAttribute="leading" secondItem="puB-eN-izg" secondAttribute="leading" id="2bP-DN-1R1"/>
                 <constraint firstAttribute="trailing" secondItem="vvf-gJ-Jtn" secondAttribute="trailing" id="4oS-Rz-h5C"/>
                 <constraint firstItem="vvf-gJ-Jtn" firstAttribute="top" secondItem="puB-eN-izg" secondAttribute="top" id="Srg-QH-Sx7"/>
-                <constraint firstItem="2FJ-xF-Csi" firstAttribute="centerY" secondItem="puB-eN-izg" secondAttribute="centerY" id="U7V-WN-Q37"/>
-                <constraint firstAttribute="bottom" secondItem="vvf-gJ-Jtn" secondAttribute="bottom" id="aDq-bd-9vV"/>
                 <constraint firstItem="2FJ-xF-Csi" firstAttribute="centerX" secondItem="puB-eN-izg" secondAttribute="centerX" id="bnD-q3-CTt"/>
-                <constraint firstAttribute="bottom" secondItem="uy6-9v-fT7" secondAttribute="bottom" constant="10" id="hed-YV-s5U"/>
-                <constraint firstItem="uy6-9v-fT7" firstAttribute="centerX" secondItem="puB-eN-izg" secondAttribute="centerX" id="lSc-xe-p9J"/>
+                <constraint firstItem="2FJ-xF-Csi" firstAttribute="centerY" secondItem="vvf-gJ-Jtn" secondAttribute="centerY" id="eBV-pI-YEJ"/>
+                <constraint firstItem="401-RQ-vto" firstAttribute="leading" secondItem="puB-eN-izg" secondAttribute="leading" id="iUL-hn-mga"/>
+                <constraint firstItem="401-RQ-vto" firstAttribute="top" secondItem="vvf-gJ-Jtn" secondAttribute="bottom" id="lWu-cq-ytB"/>
+                <constraint firstAttribute="bottom" secondItem="401-RQ-vto" secondAttribute="bottom" id="t82-WL-Nxz"/>
+                <constraint firstAttribute="trailing" secondItem="401-RQ-vto" secondAttribute="trailing" id="v0g-wv-Enj"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
-                <outlet property="segmentedControl" destination="uy6-9v-fT7" id="nRC-0m-BCJ"/>
+                <outlet property="segmentView" destination="401-RQ-vto" id="DcY-He-cn4"/>
             </connections>
-            <point key="canvasLocation" x="543" y="169.5"/>
+            <point key="canvasLocation" x="543" y="187.5"/>
         </view>
     </objects>
     <resources>
