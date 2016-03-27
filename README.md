@@ -2,7 +2,7 @@
 
 ## Screenshots
 ---------
-![image](https://github.com/shitong/XCLPageView/blob/master/Screenshots/Screenshots0.gif) 
+![image](https://github.com/shitong/XCLPageView/blob/master/Screenshots/Screenshots0) 
 
 ## 用法
 ---------
